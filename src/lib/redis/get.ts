@@ -10,8 +10,8 @@ export const get = async <Type>(
 	path: string[],
 	slim_shape = true
 ) => {
-	const isPathRes = check_JSONPaths(path);
-	if (!isPathRes.result) throw { message: 'not_path', ...isPathRes };
+	// const isPathRes = check_JSONPaths(path);
+	// if (!isPathRes.result) throw { message: 'not_path', ...isPathRes };
 	const args: [string, { path: string[] }?] = [key];
 	if (path) args.push({ path });
 	return await client.json.get(...args).then((r) => {
