@@ -6,6 +6,6 @@ export const users_index_name = 'user';
 export const protected_routes = ['/add', '/settings'];
 export const embedding_model = 'text-embedding-ada-002';
 export const embedding_field_name = 'v';
-export const ids_hash = 'ids';
+export const id_store = 'ids';
 export const content_attributes = ['name', 'body'];
 export const editable_attributes = ['name', 'body', 'payment', 'allow_replies'];
