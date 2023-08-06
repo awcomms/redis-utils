@@ -33,7 +33,6 @@ export const search = async (
 	let query = '';
 	let extra_args = ''; // ' HYBRID_POLICY ADHOC_BF';
 
-	console.log(filters);
 	if (filters && filters.length) {
 		query += '(';
 		filters.forEach((filter) => {
@@ -59,8 +58,6 @@ export const search = async (
 		query = '*';
 	}
 
-	console.log(query);
-
 	if (search) {
 		query += `=>[KNN 7 @${embedding_field_name} $BLOB${extra_args}]`;
 		options.PARAMS = {
@@ -80,7 +77,6 @@ export const search = async (
 		};
 	}
 
-	console.log(query);
 	return client.ft.search(index, query, options).then((res) => {
 		res.documents = res.documents.map((r) => {
 			r.value = slim(r.value, true) as SearchDocumentValue;
