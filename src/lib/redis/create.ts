@@ -3,7 +3,7 @@ import { id_store } from '$lib/constants/index.js';
 import { dev } from '$app/environment';
 import type { RedisClientType } from 'redis';
 
-const build_id = (index: string, id: number) => `${index}_${id}`;
+const build_id = (index: string, id: number) => `${index}:${id}`;
 
 export const add_embedding = async (data: object) => {
 	return { v: await embedding(JSON.stringify(data)), ...data };
