@@ -30,3 +30,5 @@ export const shape = (obj: KeyedObject, parse_first = false): KeyedObject => {
 		return acc;
 	}, {});
 };
+
+export {slim} from './slim.js'
