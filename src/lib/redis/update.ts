@@ -1,7 +1,7 @@
 import type { KeyedObject } from '$lib/types/index.js';
 import { is_object } from 'sveltekit-carbon-utils';
 import { embedding } from 'openai-utils';
-import { sanitize } from 'sveltekit-carbon-utils';
+import { sanitize_object} from 'sveltekit-carbon-utils';
 import type { RedisClientType } from 'redis';
 
 const include = (prefix: string, obj: KeyedObject, accumulator: KeyedObject) => {
@@ -16,7 +16,7 @@ const include = (prefix: string, obj: KeyedObject, accumulator: KeyedObject) => 
 
 export const update = async (client: RedisClientType, { id, data }: { id: string; data: KeyedObject }) => {
 	if (!is_object(data)) client.json.set(id, '$', data);
-	const sanitized_data = sanitize.sanitize_object(data);
+	const sanitized_data = sanitize_object(data);
 	const values: KeyedObject = {
 		'$.embedding': await embedding(JSON.stringify(sanitized_data))
 	};
