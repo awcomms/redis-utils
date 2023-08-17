@@ -5,7 +5,7 @@ import type { RedisClientType } from 'redis';
 
 const build_id = (index: string, id: number) => `${index}:${id}`;
 
-export const add_embedding = async (data: object) => {
+export const _add_embedding = async (data: object) => {
 	return { v: await embedding(JSON.stringify(data)), ...data };
 };
 
@@ -22,12 +22,12 @@ export const create = async (
 	await client.json.set(
 		item_id,
 		'$',
-		await add_embedding({
+		{
 			...data,
 			id: item_id,
 			created: Date.now(),
 			expires: dev
-		})
+		}
 	);
 	return item_id;
 };
