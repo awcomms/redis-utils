@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { inc } from 'semver';
 
 let mode = process.argv[2];
-if (mode !== ('patch' || 'major' || 'minor')) {
+if (!['patch', 'major', 'minor'].includes(mode)) {
 	console.error('invalid mode: ', mode);
 	process.abort(1);
 }
@@ -31,4 +31,4 @@ const execs = (commands) => {
 	}
 };
 
-execs(['git add .', `git commit -m "${m}"`, 'git push', 'npm publish']);
+execs(['git add .', `git commit -m "${m}"`, 'git push', 'npm publish --access public']);
