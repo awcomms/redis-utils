@@ -21,8 +21,8 @@ const execs = (commands) => {
 	for (let i = 0; i < commands.length; i++) {
 		exec(commands[i], (err, stdout, stderr) => {
 		console.log(commands[i]);
-			console.log('std_out: ', stdout);
-			console.log('stderr: ', stderr);
+			if (stdout) console.log('std_out: ', stdout);
+			if (stderr) console.log('std_out: ', stderr);
 			if (err) {
 				console.error(err)
 				process.abort(1)

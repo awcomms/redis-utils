@@ -8,33 +8,27 @@ import { float32_buffer } from 'sveltekit-carbon-utils';
 
 export interface SearchParams {
 	index: string;
-	page: number | null;
+	page: number | undefined;
 	filters?: Filters;
 	count?: boolean;
-	RETURN?: string[];
-	search?: string | number[];
+	query?: string;
+	options?: SearchOptions;
+	B?: Buffer;
 }
 
 export const search = async (
 	client: RedisClientType,
-	{ index, page, filters, count, search, RETURN }: SearchParams
+	{ index, page, filters, count, options = {}, B, query = filters?.length ? '' : '*' }: SearchParams
 ) => {
-	const options: SearchOptions = {
-		RETURN,
-		DIALECT: 3
-	};
+	options.DIALECT = 3;
 
-	if (page) {
-		options.LIMIT = count
-			? { from: 0, size: 0 }
-			: { from: page > 1 ? (page - 1) * items_per_page : 0, size: items_per_page };
+	if (count) {
+		options.LIMIT = { from: 0, size: 0 };
+	} else if (page) {
+		options.LIMIT = { from: page > 1 ? (page - 1) * items_per_page : 0, size: items_per_page };
 	}
 
-	let query = '';
-	let extra_args = ''; // ' HYBRID_POLICY ADHOC_BF';
-
-	if (filters && filters.length) {
-		query += '(';
+	if (filters?.length) {
 		filters.forEach((filter) => {
 			switch (filter.type) {
 				case 'tag':
@@ -52,36 +46,31 @@ export const search = async (
 					query += ` @${filter.field}:(${filter.value})`;
 			}
 		});
-		query += ')';
-		extra_args = ' HYBRID_POLICY ADHOC_BF';
-	} else {
-		query = '*';
 	}
 
-	if (search) {
-		query += `=>[KNN 7 @${embedding_field_name} $BLOB${extra_args}]`;
+	if (B) {
+		const hybrid = query && query !== '*';
+		if (hybrid) query = `(${query})`;
+		query += `=>[KNN ${(page || 1) * items_per_page} @${embedding_field_name} $B${
+			hybrid ? ' HYBRID_POLICY ADHOC_BF' : ''
+		}]`;
 		options.PARAMS = {
-			BLOB:
-				typeof search === 'string'
-					? float32_buffer(await embedding(search))
-					: float32_buffer(search)
+			B
 		};
 		options.SORTBY = {
 			BY: `__${embedding_field_name}_score`,
 			DIRECTION: 'ASC'
 		};
 	} else {
-		options.SORTBY = {
-			BY: 'created',
-			DIRECTION: 'DESC'
-		};
+		// options.SORTBY = {
+		// 	BY: '__score',
+		// 	DIRECTION: 'DESC'
+		// };
 	}
 
-	return client.ft.search(index, query, options).then((res) => {
-		res.documents = res.documents.map((r) => {
-			r.value = slim(r.value, true) as SearchDocumentValue;
-			return r;
-		});
-		return { ...res, page };
-	});
+	const res = await client.ft.search(index, query, options);
+	res.documents = res.documents.map((r) => {
+		return { ...r, value: slim(r.value, true) as unknown as SearchDocument };
+	}) as unknown as SearchDocument[];
+	return { ...res, page };
 };
